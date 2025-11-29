@@ -6,14 +6,8 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.material3.Button
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -23,7 +17,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import de.patrickwire.myapplication.pokeqr.ui.theme.PokeQRTheme
@@ -76,7 +69,8 @@ fun PokemonLookupScreen() {
     var pokemon by remember { mutableStateOf<PokemonResponse?>(null) }
 
     fun loadPokemon() {
-        if (input.isNotEmpty()) {
+        val id = input.toIntOrNull()
+        if (id != null && id in 1..151) {
             CoroutineScope(Dispatchers.IO).launch {
                 pokemon = fetchPokemon(input)
             }
@@ -84,34 +78,16 @@ fun PokemonLookupScreen() {
     }
 
     Column(Modifier.padding(16.dp)) {
-
         OutlinedTextField(
             value = input,
-            onValueChange = { input = it },
-            label = { Text("Pokémon ID") },
-            singleLine = true,
-            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
-            keyboardActions = KeyboardActions(onDone = { loadPokemon() })
+            onValueChange = { input = it; loadPokemon() },
+            label = { Text("Pokémon ID") }
         )
 
-        Spacer(Modifier.height(12.dp))
-
-        Button(onClick = { loadPokemon() }) {
-            Text("Laden")
-        }
-
-        Spacer(Modifier.height(24.dp))
-
         pokemon?.let {
-            Text("Name: ${it.name.replaceFirstChar { char -> char.uppercase() }}")
-
-            it.sprites.front_default?.let { imageUrl ->
-                AsyncImage(
-                    model = imageUrl,
-                    contentDescription = null,
-                    modifier = Modifier.size(120.dp)
-                )
-            }
+            Text("Name: ${it.name}")
+            AsyncImage(model = it.sprites.front_default, contentDescription = null)
         }
     }
+
 }
