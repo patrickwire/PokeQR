@@ -3,12 +3,14 @@ package de.patrickwire.myapplication.pokeqr
 import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.OutlinedTextField
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.Button
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -19,6 +21,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
+import io.github.g00fy2.quickie.QRResult
+import io.github.g00fy2.quickie.ScanQRCode
 import de.patrickwire.myapplication.pokeqr.ui.theme.PokeQRTheme
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -68,6 +72,8 @@ fun PokemonLookupScreen() {
     var input by remember { mutableStateOf("") }
     var pokemon by remember { mutableStateOf<PokemonResponse?>(null) }
 
+
+
     fun loadPokemon() {
         val id = input.toIntOrNull()
         if (id != null && id in 1..151) {
@@ -76,17 +82,21 @@ fun PokemonLookupScreen() {
             }
         }
     }
+    val scanner = rememberLauncherForActivityResult(ScanQRCode()) { result ->
+        if (result is QRResult.QRSuccess) {
+            input = result.content.rawValue ?: ""
+            loadPokemon()
+        }
+    }
 
     Column(Modifier.padding(16.dp)) {
-        OutlinedTextField(
-            value = input,
-            onValueChange = { input = it; loadPokemon() },
-            label = { Text("Pokémon ID") }
-        )
+        Button(onClick = { scanner.launch(null) }) {
+            Text("Scan Pokémon-ID QR")
+        }
 
         pokemon?.let {
             Text("Name: ${it.name}")
-            AsyncImage(model = it.sprites.front_default, contentDescription = null)
+            AsyncImage(model = it.sprites.front_default, contentDescription = null, modifier = Modifier.size(240.dp))
         }
     }
 

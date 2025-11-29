@@ -60,4 +60,5 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.test.manifest)
     implementation("io.coil-kt:coil-compose:2.2.2")
     implementation(libs.kotlinx.serialization.json)
+    implementation("io.github.g00fy2.quickie:quickie-bundled:1.10.0")
 }
